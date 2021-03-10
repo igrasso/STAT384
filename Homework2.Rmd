@@ -1,0 +1,78 @@
+---
+title: "Homework 2"
+output: html_notebook
+---
+Isabella Grasso
+2/14/2020
+
+##1. 
+```{r}
+library(phia)
+library(gplots)
+
+df <- data.frame(FactorS = as.factor(c(1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3)),
+                 FactorF = as.factor(c(1,1,1,2,2,2,1,1,1,2,2,2,1,1,1,2,2,2)),
+                 Value = c(189.7, 188.6,190.1,165.1,165.9,167.6,
+                           185.1,179.4,177.3,161.7,159.8,161.6,
+                           189.0,193.0,191.0,163.3,166.6,170.3)
+                 )
+```
+####a. 
+```{r}
+plotmeans(Value ~ FactorF, data = df)
+plotmeans(Value ~ FactorS, data = df)
+```
+
+####b. 
+```{r}
+model = lm(Value ~ FactorS + FactorF + FactorS:FactorF, data = df)
+IM = interactionMeans(model)
+plot(IM)
+```
+```{r}
+anova(model)
+
+```
+
+Both factors are significant alone, but the interaction is insignificant at alpha = 0.05. 
+
+##3. 
+
+#### Create df
+
+```{r}
+df2 <- data.frame(FactorF = as.factor(c(1, 1, 1, 1, 1, 1, 1, 1,
+                              2, 2, 2, 2, 2, 2, 2, 2)),
+                  FactorT = as.factor(c(1, 1, 1, 1, 2, 2, 2, 2,
+                             1, 1, 1, 1, 2, 2, 2, 2)),
+                  Value = c(40, 24, 31, 21, 46, 53, 48,
+                            46, 47, 37, 41, 41, 84, 76, 
+                            77, 79)
+                  )
+```
+
+#### ANOVA table
+```{r}
+model2 = lm(Value ~ FactorF + FactorT + FactorT:FactorF, data = df2)
+anova(model2)
+```
+
+###Main effects & Interaction plot
+```{r}
+IM2 = interactionMeans(model2)
+plot(IM2)
+
+```
+At $\alpha$ = 0.05, individual factors and interactions are all significant, and we reject the null hypothesis. There is a significant difference in yield with fertilizer 1 vs fertilizer 2, as well as with temperature and a significant interaction between temperature and fertilizer in crop yield. 
+
+
+#### 6. 
+```{r}
+m <- matrix(c(42,309,31,64,246,46,20,115,27),ncol=3,byrow=TRUE)
+colnames(m) <- c("We know","Cover up","Unsure")
+rownames(m) <- c("Democrats","Republicans","Independents")
+t <- as.table(m)
+chisq.test(t)
+
+```
+At $\alpha$ = 0.05, we reject the null hypothesis and conclude that there is a difference in opinions by political party. 

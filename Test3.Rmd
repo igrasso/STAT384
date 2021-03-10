@@ -1,0 +1,183 @@
+---
+title: "Exam 3"
+output:
+  word_document: default
+  html_notebook: default
+---
+
+Izzi Grasso
+Due: 5/2/2020
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+
+##Problem 1
+
+####Data
+```{r}
+df1 <- data.frame(
+  Depletion = c(85, 55, 40, 77),
+  ModifiedHess = c(75, 45, 35, 67),
+  Surber = c(31, 20, 9, 37),
+  SubstrateRemoval = c(43, 21, 15, 27),
+  Kicknet = c(17, 10, 8, 15)
+)
+
+
+```
+####a. Plot
+```{r}
+df2 <- df1 %>%
+  summarise_each(funs(mean)) %>%
+  gather(Var, Val)
+
+ggplot(df2, aes(x = as.factor(Var), y = Val)) + 
+  geom_line(aes(group = 1)) +
+  geom_point() + 
+  theme_linedraw() + 
+  labs( title = "Main Effects Plot",
+        x = "Variables",
+        y = "Mean Value")
+  
+```
+
+Interpretation: Since the line is not at all flat, I would expect to reject the null hypothesis. Kicknet seems to be much lower than Modified Hess and Depletion.
+
+
+####b. 
+Null Hypothesis: The distributions are the same location
+Alternative Hyp: Not null. 
+```{r}
+df1 <- df1 %>% 
+  gather(Var, Val)
+
+kruskal.test(Val ~ as.factor(Var), data = df1)
+```
+
+At $\alpha$ = 0.05 we reject the null hypothesis. There is significant evidence that the sampling procedures yield different species counts. 
+
+####c. 
+```{r}
+pairwise.wilcox.test(df1$Val, df1$Var, p.adjust.method = "bonferroni")
+```
+
+At $\alpha$ = 0.05, we fail to reject the null hypothesis. 
+
+##Problem 2 
+
+####Data
+```{r}
+TarContent <- c(14, 17, 28, 17, 16, 13, 24, 25, 18, 31)
+NicotineContent <- c(0.9, 1.1, 1.6, 1.3, 1.0, 0.8, 1.5, 1.4, 1.2, 2.0)
+```
+
+####a & b 
+Null hypothesis: $\rho$ = 0
+Alternative hyp: $\rho$ $\neq$ 0
+```{r}
+cor.test(TarContent, NicotineContent, method = "spearman")
+```
+ At $\alpha$ = 0.05 we reject the null hypothesis. There is a linear correlation between the amount of tar and the amount of nicotine found in cigarettes. 
+ 
+##Problem 3
+
+####Data 
+```{r}
+x = 261
+n = 302
+y = 401
+m = 454
+p_A = x/n
+p_B = y/m
+
+```
+
+####a. 
+```{r}
+z_ = qnorm(0.005, mean = 0, sd = 1, lower.tail = FALSE)
+
+LCI = (p_A - p_B) - z_*sqrt(x*(n-x)/(n^3)+y*(m-y)/(m^3))
+UCI = (p_A - p_B) + z_*sqrt(x*(n-x)/(n^3)+y*(m-y)/(m^3))
+
+LCI
+UCI
+```
+
+####b.
+```{r}
+z_ = qnorm(0.05, mean = 0, sd = 1, lower.tail = FALSE)
+
+LCI = (p_A - p_B) - z_*sqrt(x*(n-x)/(n^3)+y*(m-y)/(m^3))
+UCI = (p_A - p_B) + z_*sqrt(x*(n-x)/(n^3)+y*(m-y)/(m^3))
+
+LCI
+UCI
+```
+
+####c.
+```{r}
+z_ = qnorm(0.025, mean = 0, sd = 1, lower.tail = FALSE)
+
+LCI = (p_A - p_B) - z_*sqrt(x*(n-x)/(n^3)+y*(m-y)/(m^3))
+UCI = (p_A - p_B) + z_*sqrt(x*(n-x)/(n^3)+y*(m-y)/(m^3))
+
+LCI
+UCI
+```
+
+####d. 
+Null Hypothesis: $p_A$ = $p_B$
+Alternative Hyp: $p_A$ $\neq$ $p_B$
+```{r}
+p_hat = (x+y)/(n+m)
+z_star = (p_A-p_B)/sqrt(p_hat*(1-p_hat)*(1/n+1/m))
+2*pnorm(z_star, mean = 0, sd = 1)
+
+```
+
+At $\alpha$ = 0.05 we fail to reject the null hypothesis. 
+
+
+##Problem 4
+Null Hypothesis: $s^2$ $\leq$ $\sigma^2$
+Alternative hyp: $s^2$ > $\sigma^2$
+```{r}
+
+SSquared = 0.0002
+SigmaSquared = 0.0003
+alpha = 0.05
+n = 10
+
+TestStatistic <- ((n-1)*SSquared)/SigmaSquared
+
+ChiSq <- qchisq((1-alpha), df = (n-1))
+
+TestStatistic > ChiSq
+```
+
+##Problem 5
+
+####Data
+```{r}
+df3 <- data.frame(
+  Value = c(12.8, 11.7, 11.5, 12.6,
+            10.6, 14.2, 14.7, 16.5,
+            11.7, 11.8, 13.6, 15.4,
+            10.7, 9.9, 10.7, 9.6,
+            11.0, 13.8, 15.9, 17.1),
+  Treatment = rep(1:4, times = 5),
+  Block = rep(1:5, times = 1, each = 4)
+)
+```
+
+####Friedman Test, RBD
+Null hypothesis: Distributions are identical
+Alternative hypothesis: Not null hypothesis. 
+```{r}
+friedman.test(df3$Value, df3$Treatment, df3$Block)
+```
+
+At $\alpha$ = 0.05, we fail to reject the null hypothesis. There is not significant evidence to show that there is a difference between treatment means. 

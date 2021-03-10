@@ -1,0 +1,212 @@
+---
+title: "Homework 4"
+output: html_notebook
+---
+Izzi Grasso
+Due: 4/13/2020
+
+##Problem 1
+
+####Create df
+```{r}
+df <- data.frame(
+  Method = c(rep(x = "MethodA", times = 6),
+             rep(x = "MethodB", times = 7),
+             rep(x = "MethodC", times = 5)),
+  Value = c(77, 54, 67, 74, 71, 66,
+            60, 41, 59, 65, 62, 64, 52, 
+            49, 52, 69, 47, 56)
+)
+```
+
+Null hypothesis: Distributions are identical. 
+Alt: Not null. 
+
+$\alpha$ = 0.05. 
+
+####Kruskal Wallis
+```{r}
+kruskal.test(Value ~ Method, data = df)
+```
+Since p < 0.05, we reject the null hypothesis at $\alpha$ = 0.05 and conclude there is a difference in efficacy of corrosion reduction methods. 
+
+####Post-hoc
+```{r}
+pairwise.wilcox.test(df$Value, df$Method,
+                 p.adjust.method = "bonferroni")
+```
+We can conclude Method A and Method B are significantly different. 
+
+##Problem 2
+####Data
+```{r}
+
+  Polluted <- c(21.3, 18.7, 23.0, 17.1, 16.8, 20.9, 19.7)
+  Unpolluted  <-  c(14.2, 18.3, 17.2, 18.4, 20.0)
+
+```
+
+####Test for homogeneity
+Null hypothesis: $\sigma_1^2$ = $\sigma_2^2$
+Alternative hyp: $\sigma_1^2$ $\neq$ $\sigma_2^2$
+```{r}
+var.test(Polluted, Unpolluted)
+```
+At $\alpha$ = 0.05, we fail to reject null hypothesis. 
+
+
+####Check for normality (Shapiro)
+Null Hypothesis: normally distributed
+Alternative Hyp: Not normally distributed
+```{r}
+shapiro.test(Polluted)
+shapiro.test(Unpolluted)
+```
+Fail to reject null hypothesis. Assumption of normality holds. 
+
+####Pooled t-test
+Null Hypothesis: $\mu_1$ = $\mu_2$
+Althernative Hyp: $\mu_1$ > $\mu_2$
+```{r}
+t.test(Polluted, Unpolluted, alternative = "greater", var.equal = TRUE)
+```
+
+We fail to reject the null hypothesis at $\alpha$ = 0.05. There is not significant evidence that the true fluoride concentration for livestock grazing is higher in the polluted region than the unpolluted region. 
+
+##Problem 3
+####Data 
+```{r}
+Day1 <- c(5.0, 4.8, 5.1, 5.1, 4.8, 5.1, 4.8, 4.8, 5.0, 5.2, 4.9, 4.9, 5.0)
+Day2 <- c(5.8, 4.7, 4.7, 4.9, 5.1, 4.9, 5.4, 5.3, 5.3, 4.8, 5.7, 5.1, 5.7)
+```
+
+
+####Test for homogeneity
+Null Hypothesis: $\sigma_1^2$ = $\sigma_2^2$
+Alternative Hyp: $\sigma_1^2$ < $\sigma_2^2$
+```{r}
+var.test(Day1, Day2, alternative = "less", conf.level = .99)
+```
+
+At $\alpha$ = 0.01, we reject the null hypothesis. There is significant evidence that the variability of the process is greater on the second day than on the first. 
+
+##Problem 4
+####Data
+```{r}
+Men <- c(5, 10, 2, 0, 6, 4, 5, 15)
+Women <- c(8, 9, 3, 5, 0, 4, 15)
+```
+
+####Test for normality (shapiro)
+Null Hypothesis: normally distributed
+Alternative Hyp: Not normally distributed
+```{r}
+shapiro.test(Men)
+shapiro.test(Women)
+```
+Fail to reject null hypothesis. Assumption of normality holds. 
+
+####Test for homogeneity
+Null Hypothesis: $\sigma_1^2$ = $\sigma_2^2$
+Alternative Hyp: $\sigma_1^2$ $\neq$ $\sigma_2^2$
+```{r}
+var.test(Men, Women)
+```
+Fail to reject null hypothesis. We can assume homogeneity. 
+
+####Two sample t-test
+```{r}
+t.test(Men, Women, alternative = "two.sided", paired = FALSE, var.equal = TRUE, conf.level = 0.95)
+```
+At $\alpha$ = 0.05, we fail to reject the null hypothesis. There is not significant evidence that there is a difference in sick days between men and women. 
+
+##Problem 5
+####Data frame
+```{r}
+df3 <- data.frame(
+  F1 = c(58, 29, 37, 40, 44, 37, 49, 49, 38),
+  F2 = c(68, 67, 69, 58, 62, 48, 62, 76, 66),
+  F3 = c(96, 90, 90, 103, 100, 91, 100, 114, 94),
+  F4 = c(101, 110, 90, 103, 100, 91, 100, 114, 94),
+  F5 = c(124, 114, 111, 113, 114, 102, 114, 112, 103)
+)
+```
+
+####Test for normality
+```{r}
+shapiro.test(df3$F1)
+shapiro.test(df3$F2)
+shapiro.test(df3$F3)
+shapiro.test(df3$F4)
+shapiro.test(df3$F5)
+```
+Fail to reject null hypothesis. Normality assumption holds. 
+
+
+####ANOVA
+Null hypothesis: $\mu_1$ = $\mu_2$ = .. = $\mu_5$
+Alternative hyp: Not null hypothesis
+```{r}
+df4 <- df3 %>% gather(Fertilizer, Value) 
+model <- aov(Value ~ Fertilizer, df4)
+summary(model)
+```
+At $\alpha$ = 0.01, we reject the null hypothesis. There is evidence that there is difference in yield by fertilizer. 
+
+
+####Residual analysis
+```{r}
+plot(model)
+```
+Normality assumption holds, and homogeneity assumption holds. 
+
+####Tukey test
+```{r}
+plot(TukeyHSD(model))
+```
+All yields are different from others except F4-F3. F5 produces the largest yield. 
+
+####Kruskal Wallis
+Null hypothesis: $\mu_1$ = $\mu_2$ = .. = $\mu_5$
+Alternative hyp: Not null hypothesis
+```{r}
+kruskal.test(Value ~ as.factor(Fertilizer), data = df4)
+```
+At $\alpha$ = 0.01, we reject the null hypothesis. There is evidence that there is a difference of yield by fertilizer type. 
+
+####Post hoc
+```{r}
+pairwise.wilcox.test(df4$Value, df4$Fertilizer,
+                 p.adjust.method = "bonferroni")
+```
+At $\alpha$ = 0.01, F3-F4, F4-F5, F3-F5, and F1-F2 do not have a significant difference. 
+
+##Problem 6
+####Data 
+```{r}
+x <- c(47, 62, 65, 70, 75, 78, 95, 100, 120, 118)
+y <- c(38, 62, 60, 67, 84, 79, 93, 104, 117, 150)
+
+df5 <- data.frame(
+  X = x,
+  Y = y
+)
+```
+
+####Plot
+```{r}
+ggplot(df5, aes(x = X, y = Y)) + 
+  geom_point() +
+  theme_linedraw()
+```
+Data looks linear, correlation analysis is reasonable. 
+
+####Spearman Rank
+Null hypothesis: $\rho$ = 0
+Alternative hyp: $\rho$ $\neq$ 0
+```{r}
+cor.test(x, y, method = "spearman")
+```
+
+At $\alpha$ = 0.05 we reject the null hypothesis. There is a strong positive correlation between x and y. 
+

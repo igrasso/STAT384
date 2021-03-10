@@ -1,0 +1,44 @@
+---
+title: "ANOVA 1/28/2020"
+output: html_notebook
+---
+###Isabella Grasso
+
+##Load libraries
+
+```{r}
+library(tidyverse)
+library(broom)
+
+```
+
+##Create data frame
+```{r}
+df <- data.frame(B1 = c(13.1, 15.0, 14.0, 14.4,14.0,11.6),
+                 B2 = c(16.3, 15.7, 17.2, 14.9, 14.4, 17.2),
+                 B3 = c(13.7, 13.9, 12.4, 13.8, 14.9, 13.3),
+                 B4 = c(15.7, 13.7, 14.4, 16, 13.9, 14.7),
+                 B5 = c(13.5, 13.4, 13.2, 12.7, 13.4, 12.3))
+df2 <- gather(df, "Brand", "Value")
+```
+
+##ANOVA
+```{r}
+model <- aov(Value ~ Brand, df2)
+summary(model)
+```
+
+##Residuals
+```{r}
+plot(model)
+```
+##Tukey
+```{r}
+plot(TukeyHSD(model))
+
+```
+
+```{r}
+interaction.plot(df2$Brand,response  = df2$Value)
+```
+
